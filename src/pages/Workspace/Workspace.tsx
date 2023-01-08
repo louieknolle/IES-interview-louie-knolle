@@ -1,22 +1,30 @@
-import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableFooter,
-  TablePagination,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
-} from "@mui/material";
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import productFactory from "./utils";
+import Title from "./Title";
+import ProductsTable from "./ProductsTable";
+import SearchBar from "./SearchBar";
 
 // Generate 100 random products
 const fakeFetchProducts = () => Array.from({ length: 100 }, productFactory);
 const products = fakeFetchProducts();
+
+export interface ProductsTableProps {
+  data: any[];
+  page: number;
+  rowsPerPage: number;
+  filteredProducts: any[];
+  emptyRows: number;
+  handleChangePage: (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    page: number
+  ) => void;
+  handleChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export interface SearchBarProps {
+  searchValue: string;
+  setSearchValue: Dispatch<SetStateAction<string>>;
+}
 
 const Workspace = (): JSX.Element => {
   // TODO: Create a UI to display and search the data above.
@@ -50,117 +58,17 @@ const Workspace = (): JSX.Element => {
 
   return (
     <>
-      <Typography variant="h4" align="center" color="secondary" gutterBottom>
-        Products Manager
-      </Typography>
-      <TextField
-        value={searchValue}
-        onChange={(e) => setSearchValue(e.target.value)}
-        label="Search"
-        variant="outlined"
-        fullWidth
-        sx={{ marginBottom: "5%" }}
+      <Title />
+      <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} />
+      <ProductsTable
+        data={data}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        filteredProducts={filteredProducts}
+        emptyRows={emptyRows}
+        handleChangePage={handleChangePage}
+        handleChangeRowsPerPage={handleChangeRowsPerPage}
       />
-      <TableContainer component={Paper}>
-        <Table
-          sx={{ minWidth: 500, height: "50%" }}
-          aria-label="custom pagination table"
-        >
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ width: "10%" }}>Product</TableCell>
-              <TableCell align="right" sx={{ width: "15%" }}>
-                Type
-              </TableCell>
-              <TableCell align="right" sx={{ width: "15%" }}>
-                Score
-              </TableCell>
-              <TableCell align="right" sx={{ width: "20%" }}>
-                Manufacturer
-              </TableCell>
-              <TableCell align="right" sx={{ width: "15%" }}>
-                Status
-              </TableCell>
-              <TableCell align="right" sx={{ width: "15%" }}>
-                Groups
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredProducts.length ? (
-              (rowsPerPage > 0
-                ? filteredProducts.slice(
-                    page * rowsPerPage,
-                    page * rowsPerPage + rowsPerPage
-                  )
-                : filteredProducts
-              ).map((product) => {
-                const productString = JSON.stringify(product);
-                return (
-                  <TableRow key={productString}>
-                    <TableCell component="th" scope="row">
-                      {product.name}
-                    </TableCell>
-                    <TableCell align="right">{product.productType}</TableCell>
-                    <TableCell align="right">{product.score}</TableCell>
-                    <TableCell align="right">{product.manufacturer}</TableCell>
-                    <TableCell align="right">{product.status}</TableCell>
-                    <TableCell align="right">
-                      {Array.isArray(product.groups)
-                        ? product.groups.join(", ")
-                        : product.groups}
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            ) : (
-              <Typography>No results</Typography>
-            )}
-            {emptyRows > 0 && (
-              <TableRow style={{ height: 53 * emptyRows }}>
-                <TableCell colSpan={6} />
-              </TableRow>
-            )}
-          </TableBody>
-          <TableFooter sx={{ backgroundColor: "#efefef" }}>
-            <TableRow>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                count={data.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                SelectProps={{
-                  inputProps: {
-                    "aria-label": "rows per page",
-                  },
-                }}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                labelDisplayedRows={({ page }) => {
-                  return `Page: ${page}`;
-                }}
-                backIconButtonProps={{
-                  color: "secondary",
-                }}
-                nextIconButtonProps={{ color: "secondary" }}
-                showFirstButton={true}
-                showLastButton={true}
-                labelRowsPerPage={<span>Rows:</span>}
-                sx={{
-                  ".MuiTablePagination-toolbar": {
-                    backgroundColor: "#efefef",
-                  },
-                  ".MuiTablePagination-selectLabel, .MuiTablePagination-input":
-                    {
-                      fontWeight: "bold",
-                      color: "black",
-                    },
-                }}
-              />
-            </TableRow>
-          </TableFooter>
-        </Table>
-      </TableContainer>
     </>
   );
 };
